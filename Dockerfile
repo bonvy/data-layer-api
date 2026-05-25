@@ -1,29 +1,29 @@
-# Fase 1: Compilazione con Maven e JDK 25
-FROM maven:3.9-eclipse-temurin-25 AS build
+# Fase 1: Compilazione Nativa con GraalVM e Maven
+FROM ghcr.io/graalvm/native-image-community:22 AS build
 WORKDIR /code
 
-# Copia il pom.xml per fare il caching delle dipendenze
+# Installa Maven (GraalVM community non lo ha di serie)
+RUN microdnf install -y maven
+
+# Copia i file del progetto
 COPY pom.xml /code/
 RUN mvn dependency:go-offline
 
-# Copia il codice sorgente e compila il Fast-JAR di Quarkus
-COPY src /code/src
-RUN mvn package -DskipTests
+COPY . /code/
 
-# Fase 2: Esecuzione con JRE 25 (leggera e sicura)
-FROM eclipse-temurin:25-jre-alpine
-WORKDIR /deployments
+# Compilazione nativa (Crea un file eseguibile dentro target/)
+RUN mvn package -Pnative -DskipTests -Dquarkus.native.container-build=false
 
-# Copia gli artefatti generati da Quarkus
-COPY --from=build /code/target/quarkus-app/lib/ /deployments/lib/
-COPY --from=build /code/target/quarkus-app/*.jar /deployments/
-COPY --from=build /code/target/quarkus-app/app/ /deployments/app/
-COPY --from=build /code/target/quarkus-app/quarkus/ /deployments/quarkus/
+# Fase 2: Immagine finale microscopica (senza Java!)
+FROM alpine:3.19
+WORKDIR /work/
 
+# Copia il binario nativo generato (si chiama di solito *-runner)
+COPY --from=build /code/target/*-runner /work/application
+
+# Permessi di esecuzione e configurazione porta
+RUN chmod 775 /work/application
 EXPOSE 8080
 
-# Ottimizzazioni per Java 25 su piani Free (es. Render 512MB RAM)
-# Usiamo ZGC (Z Garbage Collector) che è fantastico in Java 25 per gestire la memoria in modo efficiente
-ENV JAVA_TOOL_OPTIONS="-XX:+UseZGC -XX:MaxRAMPercentage=70.0 -Dquarkus.http.host=0.0.0.0"
-
-CMD ["java", "-jar", "/deployments/quarkus-run.jar"]
+# Avvia direttamente il binario nativo
+CMD ["./application", "-Dquarkus.http.host=0.0.0.0"]
