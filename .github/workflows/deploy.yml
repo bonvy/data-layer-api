@@ -16,9 +16,11 @@ jobs:
       packages: write
 
     steps:
+      # 1. QUESTO STEP È FONDAMENTALE: scarica il tuo codice sul server
       - name: Checkout code
         uses: actions/checkout@v4
 
+      # 2. Poi fai il login al registro Docker
       - name: Log in to the Container Registry
         uses: docker/login-action@v3
         with:
@@ -26,15 +28,11 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      # 3. Adesso il debug funzionerà e ti mostrerà i file
       - name: Debug - Mostra la struttura delle cartelle attuale
-        run: |
-            echo "=== DOVE MI TROVO ==="
-            pwd
-            echo "=== CONTENUTO DELLA CARTELLA CORRENTE ==="
-            ls -la
-            echo "=== CONTENUTO RICORSIVO ==="
-            ls -R
+        run: ls -a
 
+      # 4. E infine la build di Docker
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
@@ -42,8 +40,3 @@ jobs:
           file: ./Dockerfile
           push: true
           tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
-
-      - name: Deploy to Render
-        # Sostituisci questo step con il Deploy Hook di Render
-        run: |
-          curl -X POST "${{ secrets.RENDER_DEPLOY_HOOK_URL }}"
