@@ -27,7 +27,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Debug - Mostra la struttura delle cartelle attuale
-          run: |
+        run: |
             echo "=== DOVE MI TROVO ==="
             pwd
             echo "=== CONTENUTO DELLA CARTELLA CORRENTE ==="
