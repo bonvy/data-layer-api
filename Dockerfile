@@ -1,5 +1,5 @@
 # Fase 1: Compilazione Nativa con GraalVM e Maven
-FROM ghcr.io/graalvm/native-image-community:22 AS build
+FROM ghcr.io/graalvm/native-image-community:25 AS build
 WORKDIR /code
 
 # Installa Maven (GraalVM community non lo ha di serie)
