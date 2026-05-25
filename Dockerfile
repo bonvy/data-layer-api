@@ -7,7 +7,7 @@ COPY pom.xml /code/
 RUN mvn dependency:go-offline
 
 # Copia il codice sorgente e compila il Fast-JAR di Quarkus
-COPY src /code/src
+COPY . /code/
 RUN mvn package -DskipTests
 
 # Fase 2: Esecuzione con JRE 25 (leggera e sicura)
