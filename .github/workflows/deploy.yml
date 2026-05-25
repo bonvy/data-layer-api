@@ -26,6 +26,15 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Debug - Mostra la struttura delle cartelle attuale
+          run: |
+            echo "=== DOVE MI TROVO ==="
+            pwd
+            echo "=== CONTENUTO DELLA CARTELLA CORRENTE ==="
+            ls -la
+            echo "=== CONTENUTO RICORSIVO ==="
+            ls -R
+
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
