@@ -12,7 +12,11 @@ RUN mvn dependency:go-offline
 COPY . /code/
 
 # Compilazione nativa (Crea un file eseguibile dentro target/)
-RUN mvn package -Pnative -DskipTests -Dquarkus.native.container-build=false
+RUN mvn package -Pnative -DskipTests \
+    -Dquarkus.native.container-build=false \
+    -Dquarkus.native.native-image-xmx=4g \
+    -Dquarkus.native.monitoring=none \
+    -Dquarkus.native.additional-build-args=-J-Xmx4g,--no-fallback
 
 # Fase 2: Immagine finale microscopica (senza Java!)
 FROM alpine:3.19
